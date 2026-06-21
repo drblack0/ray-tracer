@@ -1,18 +1,28 @@
 use crate::{
     color::{Color, write_color},
     ray::Ray,
-    vec3::{Point3, Vec3},
+    vec3::{Point3, Vec3, dot},
 };
-use std::f64;
+use std::{f64, mem::discriminant};
 
 mod color;
 mod ray;
 mod vec3;
 
-const IMAGE_WIDTH: i32 = 256;
-const IMAGE_HEIGHT: i32 = 256;
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+    let oc: Vec3 = center - ray.origin();
+    let a = dot(ray.direction(), ray.direction());
+    let b = -2.0 * dot(ray.direction(), &oc);
+    let c = dot(&oc, &oc) - radius * radius;
+
+    let disc = b * b - 4.0 * a * c;
+    disc >= 0.0
+}
 
 fn ray_color(ray: &Ray) -> Color {
+    if hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
     let unit_direction = vec3::unit_vector(ray.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
     let color = (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
@@ -46,10 +56,10 @@ fn main() {
     let mut v = vec3::Vec3::new(4.0, 4.0, 4.0);
     let v2 = vec3::Vec3::new(2.0, 2.0, 2.0);
     v += v2;
-    println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255\n");
-    for j in 0..IMAGE_HEIGHT {
-        eprint!("\rScanlines remaining: {} ", IMAGE_HEIGHT - j);
-        for i in 0..IMAGE_WIDTH {
+    println!("P3\n{image_width} {image_height}\n255\n");
+    for j in 0..image_height {
+        eprint!("\rScanlines remaining: {} ", image_height - j);
+        for i in 0..image_width {
             let pixel_center =
                 pixel00_loc + (i as f64 * pixel_delta_u) + (j as f64 * pixel_delta_v);
             let ray_direction = pixel_center - camera_center;

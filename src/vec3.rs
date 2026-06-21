@@ -214,6 +214,17 @@ impl Sub for Vec3 {
     }
 }
 
+impl Sub<&Vec3> for &Vec3 {
+    type Output = Vec3;
+    fn sub(self, rhs: &Vec3) -> Self::Output {
+        Vec3::new(
+            self.elements[0] - rhs.elements[0],
+            self.elements[1] - rhs.elements[1],
+            self.elements[2] - rhs.elements[2],
+        )
+    }
+}
+
 impl SubAssign for Vec3 {
     fn sub_assign(&mut self, rhs: Self) {
         self.elements[0] -= rhs.elements[0];
