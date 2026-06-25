@@ -1,27 +1,34 @@
 use crate::{
     color::{Color, write_color},
     ray::Ray,
-    vec3::{Point3, Vec3, dot},
+    vec3::{Point3, Vec3, dot, unit_vector},
 };
-use std::{f64, mem::discriminant};
+use std::f64;
 
 mod color;
 mod ray;
 mod vec3;
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
     let oc: Vec3 = center - ray.origin();
     let a = dot(ray.direction(), ray.direction());
     let b = -2.0 * dot(ray.direction(), &oc);
     let c = dot(&oc, &oc) - radius * radius;
 
     let disc = b * b - 4.0 * a * c;
-    disc >= 0.0
+
+    if disc < 0.0 {
+        return -1.0;
+    } else {
+        -b - f64::sqrt(disc) / (2.0 * a)
+    }
 }
 
 fn ray_color(ray: &Ray) -> Color {
-    if hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray) {
-        return Color::new(1.0, 0.0, 0.0);
+    let t = hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray);
+    if t > 0.0 {
+        let N = unit_vector(&(&ray.at(t) - &Vec3::new(0.0, 0.0, -1.0)));
+        return 0.5 * color::Color::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0);
     }
     let unit_direction = vec3::unit_vector(ray.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
