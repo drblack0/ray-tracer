@@ -6,23 +6,11 @@ use crate::{
 use std::f64;
 
 mod color;
+mod hittable;
 mod ray;
+mod sphere;
+mod utility;
 mod vec3;
-
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
-    let oc: Vec3 = center - ray.origin();
-    let a = dot(ray.direction(), ray.direction());
-    let b = -2.0 * dot(ray.direction(), &oc);
-    let c = dot(&oc, &oc) - radius * radius;
-
-    let disc = b * b - 4.0 * a * c;
-
-    if disc < 0.0 {
-        return -1.0;
-    } else {
-        -b - f64::sqrt(disc) / (2.0 * a)
-    }
-}
 
 fn ray_color(ray: &Ray) -> Color {
     let t = hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray);
