@@ -5,13 +5,13 @@ use crate::{
     vec3::Point3,
 };
 
-struct Sphere {
+pub struct Sphere {
     center: Point3,
     radius: f64,
 }
 
 impl Sphere {
-    fn new(point: Point3, radius: f64) -> Sphere {
+    pub fn new(point: Point3, radius: f64) -> Sphere {
         Sphere {
             center: point,
             radius: radius,

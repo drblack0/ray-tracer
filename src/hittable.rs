@@ -10,8 +10,8 @@ pub struct HittableList {
 }
 
 impl HittableList {
-    pub fn new(list: Vec<Box<dyn Hittable>>) -> HittableList {
-        HittableList { list }
+    pub fn new() -> HittableList {
+        HittableList { list: Vec::new() }
     }
 
     pub fn clear(&mut self) {
@@ -21,8 +21,10 @@ impl HittableList {
     pub fn add(&mut self, object: Box<dyn Hittable>) {
         self.list.push(object);
     }
+}
 
-    pub fn hit(&self, r: &Ray, ray_tmin: f64, ray_tmax: f64, hit_record: &mut HitRecord) -> bool {
+impl Hittable for HittableList {
+    fn hit(&self, r: &Ray, ray_tmin: f64, ray_tmax: f64, hit_record: &mut HitRecord) -> bool {
         let mut temp_record = HitRecord::new();
         let mut hit_anything = false;
         let mut closest_so_far = ray_tmax;

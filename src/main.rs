@@ -1,27 +1,30 @@
 use crate::{
     color::{Color, write_color},
+    hittable::{HitRecord, Hittable, HittableList},
     ray::Ray,
+    utility::INFINITY,
     vec3::{Point3, Vec3, dot, unit_vector},
 };
 use std::f64;
 
 mod color;
 mod hittable;
+mod interval;
 mod ray;
 mod sphere;
 mod utility;
 mod vec3;
 
-fn ray_color(ray: &Ray) -> Color {
-    let t = hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, ray);
-    if t > 0.0 {
-        let N = unit_vector(&(&ray.at(t) - &Vec3::new(0.0, 0.0, -1.0)));
-        return 0.5 * color::Color::new(N.x() + 1.0, N.y() + 1.0, N.z() + 1.0);
+fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+    let mut rec = HitRecord::new();
+
+    if world.hit(ray, 0.0, INFINITY, &mut rec) {
+        return 0.5 * rec.normal + Color::new(1.0, 1.0, 1.0);
     }
-    let unit_direction = vec3::unit_vector(ray.direction());
+
+    let unit_direction = unit_vector(ray.direction());
     let a = 0.5 * (unit_direction.y() + 1.0);
-    let color = (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
-    color
+    return (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
 }
 
 fn main() {
@@ -32,6 +35,17 @@ fn main() {
     if image_height < 1 {
         image_height = 1;
     }
+
+    let mut world = HittableList::new();
+    world.add(Box::new(sphere::Sphere::new(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+    )));
+
+    world.add(Box::new(sphere::Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+    )));
 
     let focal_length = 1.0;
     let viewport_height = 2.0;
@@ -60,7 +74,7 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
 
-            let color = ray_color(&ray);
+            let color = ray_color(&ray, &world);
             write_color(color);
         }
     }
