@@ -1,7 +1,9 @@
 use std::{
-    fmt,
+    f64, fmt,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign},
 };
+
+use crate::utility::{random_float, random_float_by_range};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -27,6 +29,21 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
+    pub fn random() -> Vec3 {
+        Vec3 {
+            elements: [random_float(), random_float(), random_float()],
+        }
+    }
+
+    pub fn random_from_range(min: f64, max: f64) -> Vec3 {
+        Vec3 {
+            elements: [
+                random_float_by_range(min, max),
+                random_float_by_range(min, max),
+                random_float_by_range(min, max),
+            ],
+        }
+    }
     pub fn x(&self) -> f64 {
         self.elements[0]
     }
@@ -247,6 +264,26 @@ pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
 
 pub fn unit_vector(v: &Vec3) -> Vec3 {
     v / v.length()
+}
+
+pub fn random_unit_vector() -> Vec3 {
+    loop {
+        let p = Vec3::random();
+        let lensq = p.length_squared();
+
+        if 1e-160 < lensq && lensq <= 1.0 {
+            return p / f64::sqrt(lensq);
+        }
+    }
+}
+
+pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
+    let on_unit_sphere = random_unit_vector();
+    if dot(&on_unit_sphere, normal) > 0.0 {
+        return on_unit_sphere;
+    } else {
+        -on_unit_sphere
+    }
 }
 
 impl fmt::Display for Vec3 {

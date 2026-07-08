@@ -1,7 +1,8 @@
-use std::path::Component::Normal;
+use std::{path::Component::Normal, rc::Rc};
 
 use crate::{
     interval::Interval,
+    material::Material,
     ray::Ray,
     vec3::{Point3, Vec3, dot},
 };
