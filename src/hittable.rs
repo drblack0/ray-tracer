@@ -1,6 +1,7 @@
 use std::path::Component::Normal;
 
 use crate::{
+    interval::Interval,
     ray::Ray,
     vec3::{Point3, Vec3, dot},
 };
@@ -24,13 +25,20 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, r: &Ray, ray_tmin: f64, ray_tmax: f64, hit_record: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, interval: &Interval, hit_record: &mut HitRecord) -> bool {
         let mut temp_record = HitRecord::new();
         let mut hit_anything = false;
-        let mut closest_so_far = ray_tmax;
+        let mut closest_so_far = interval.max;
 
         for object in &self.list {
-            if object.hit(r, ray_tmin, closest_so_far, &mut temp_record) {
+            if object.hit(
+                r,
+                &Interval {
+                    min: interval.min,
+                    max: closest_so_far,
+                },
+                &mut temp_record,
+            ) {
                 hit_anything = true;
                 closest_so_far = temp_record.t;
                 *hit_record = temp_record.clone();
@@ -70,5 +78,5 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, r: &Ray, ray_tmin: f64, ray_tmax: f64, hit_record: &mut HitRecord) -> bool;
+    fn hit(&self, r: &Ray, interval: &Interval, hit_record: &mut HitRecord) -> bool;
 }
