@@ -1,8 +1,9 @@
-use std::{path::Component::Normal, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
+    color::Color,
     interval::Interval,
-    material::Material,
+    material::{Lambertian, Material},
     ray::Ray,
     vec3::{Point3, Vec3, dot},
 };
@@ -55,6 +56,7 @@ pub struct HitRecord {
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
+    pub mat: Rc<dyn Material>,
 }
 
 impl HitRecord {
@@ -74,6 +76,7 @@ impl HitRecord {
             normal: Vec3::new(0.0, 0.0, 0.0),
             t: 0.0,
             front_face: false,
+            mat: Rc::new(Lambertian::new(&Color::new(0.0, 0.0, 0.0))),
         }
     }
 }

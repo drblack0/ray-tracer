@@ -1,4 +1,8 @@
+use std::rc::Rc;
+
+use crate::color::Color;
 use crate::interval::Interval;
+use crate::material::{self, Material};
 use crate::ray::Ray;
 use crate::vec3::dot;
 use crate::{
@@ -9,13 +13,15 @@ use crate::{
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    mat: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(point: Point3, radius: f64) -> Sphere {
+    pub fn new(point: Point3, radius: f64, mat: Rc<dyn Material>) -> Sphere {
         Sphere {
             center: point,
             radius: radius,
+            mat: mat,
         }
     }
 }
@@ -47,6 +53,20 @@ impl Hittable for Sphere {
         let outward_normal = (hit_record.p - self.center) / self.radius;
         hit_record.set_face_normal(&r, outward_normal);
 
+        hit_record.mat = self.mat.clone();
+
         return true;
+    }
+}
+
+impl Material for Sphere {
+    fn scatter(
+        &self,
+        ray_in: &Ray,
+        hit_record: &HitRecord,
+        scattered: &mut Ray,
+        attenuation: &mut Color,
+    ) -> bool {
+        false
     }
 }

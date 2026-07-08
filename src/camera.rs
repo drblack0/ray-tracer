@@ -1,9 +1,8 @@
 use crate::{
-    color::{self, Color, write_color},
+    color::{Color, write_color},
     hittable::{HitRecord, Hittable},
     interval,
     ray::Ray,
-    ray_color,
     utility::{INFINITY, random_float},
     vec3::{Point3, Vec3, random_on_hemisphere, unit_vector},
 };
@@ -44,7 +43,7 @@ impl Camera {
     }
 
     fn ray_color(ray: &Ray, world: &dyn Hittable, depth: i32) -> Color {
-        if (depth <= 0) {
+        if depth <= 0 {
             return Color::new(0.0, 0.0, 0.0);
         }
         let mut rec: HitRecord = HitRecord::new();
@@ -56,8 +55,14 @@ impl Camera {
             },
             &mut rec,
         ) {
-            let direction = rec.normal + random_on_hemisphere(&rec.normal);
-            return 0.7 * Self::ray_color(&Ray::new(rec.p, direction), world, depth - 1);
+            let mut scattered: Ray = Ray::default();
+            let mut attenuation = Color::default();
+
+            if rec.mat.scatter(ray, &rec, &mut scattered, &mut attenuation) {
+                return attenuation * Self::ray_color(&scattered, world, depth - 1);
+            }
+
+            return Color::new(0.0, 0.0, 0.0);
         }
 
         let unit_direction = unit_vector(ray.direction());
