@@ -1,10 +1,4 @@
-use crate::{
-    color::Color,
-    hittable::{HitRecord, Hittable, HittableList},
-    ray::Ray,
-    utility::INFINITY,
-    vec3::{Point3, unit_vector},
-};
+use crate::{hittable::HittableList, vec3::Point3};
 
 mod camera;
 mod color;
@@ -15,25 +9,6 @@ mod ray;
 mod sphere;
 mod utility;
 mod vec3;
-
-fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
-    let mut rec = HitRecord::new();
-
-    if world.hit(
-        ray,
-        &interval::Interval {
-            min: 0.0,
-            max: INFINITY,
-        },
-        &mut rec,
-    ) {
-        return 0.5 * rec.normal + Color::new(1.0, 1.0, 1.0);
-    }
-
-    let unit_direction = unit_vector(ray.direction());
-    let a = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0);
-}
 
 fn main() {
     let mut world = HittableList::new();
