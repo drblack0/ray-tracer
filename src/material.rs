@@ -1,8 +1,11 @@
+use std::f64;
+
 use crate::{
     color::Color,
     hittable::HitRecord,
     ray::{self, Ray},
-    vec3::{random_unit_vector, reflect, refract, unit_vector},
+    utility::random_float,
+    vec3::{Vec3, dot, random_unit_vector, reflect, refract, unit_vector},
 };
 
 pub trait Material {
@@ -79,6 +82,12 @@ impl Dielectric {
             refraction_index: ri,
         }
     }
+
+    fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
+        let mut r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
+        r0 = r0 * r0;
+        r0 + (1.0 - r0) * f64::powi((1.0 - cosine), 5)
+    }
 }
 
 impl Material for Dielectric {
@@ -98,9 +107,20 @@ impl Material for Dielectric {
         }
 
         let unit_direction = unit_vector(ray_in.direction());
-        let refracted = refract(&unit_direction, &hit_record.normal, ri);
 
-        *scattered = Ray::new(hit_record.p, refracted);
+        let cos_theta = f64::min(dot(&(-unit_direction), &hit_record.normal), 1.0);
+        let sin_theta = f64::sqrt(1.0 - cos_theta * cos_theta);
+
+        let cannot_reflect = ri * sin_theta > 1.0;
+        let mut direction = Vec3::default();
+
+        if cannot_reflect || Self::reflectance(cos_theta, ri) > random_float() {
+            direction = reflect(&unit_direction, &hit_record.normal)
+        } else {
+            direction = refract(&unit_direction, &hit_record.normal, ri)
+        }
+
+        *scattered = Ray::new(hit_record.p, direction);
 
         true
     }
